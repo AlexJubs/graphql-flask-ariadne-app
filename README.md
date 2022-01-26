@@ -1,0 +1,1 @@
+# graphql-flask-ariadne-app
