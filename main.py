@@ -8,18 +8,17 @@ from ariadne import gql, QueryType, MutationType, make_executable_schema, graphq
 type_defs = gql(
    """
    type Query {
-        places: [Place]
+        functions: [Function]
    }
 
 
-   type Place {
+   type Function {
         name: String!
-        description: String!
-        country: String!
+        runtime: String!
     }  
 
    type Mutation {
-        add_place(name: String!, description: String!, country: String!): Place
+        add_function(name: String!): Function
     }
    """
 )
@@ -34,15 +33,14 @@ mutation = MutationType()
 
 # Define resolvers
 
-# places resolver (return places )
-@query.field("places")
-def places(*_):
-   return [place.to_json() for place in Places.query.all()]
+@query.field("functions")
+def functions(*_):
+   return [place.to_json() for place in Functions.query.all()]
 
 # place resolver (add new  place)
-@mutation.field("add_place")
-def add_place(_, info, name, description, country):
-   place = Places(name=name, description=description, country=country)
+@mutation.field("add_function")
+def add_function(_, info, name):
+   place = Functions(name=name)
    place.save()
    return place.to_json()
 
@@ -58,17 +56,13 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-class Places(db.Model):
+class Functions(db.Model):
    id = db.Column(db.Integer, primary_key=True)
    name = db.Column(db.String(80), nullable=False)
-   description = db.Column(db.String(255), nullable=False)
-   country = db.Column(db.String(80), nullable=False)
 
    def to_json(self):
        return {
-           "name": self.name,
-           "description": self.description,
-           "country": self.country,
+           "name": self.name
        }
 
    def save(self):
